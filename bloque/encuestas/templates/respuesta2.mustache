@@ -1,0 +1,135 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_report/reporte
+
+
+    Example context (json):
+    {
+
+    }
+}}
+
+
+
+<script
+			  src="https://code.jquery.com/jquery-3.5.1.slim.js"
+			  integrity="sha256-DrT5NfxfbHvMHux31Lkhxg42LY6of8TaYyK50jnxRnM="
+			  crossorigin="anonymous"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.8/shim.min.js" integrity="sha512-nPnkC29R0sikt0ieZaAkk28Ib7Y1Dz7IqePgELH30NnSi1DzG4x+envJAOHz8ZSAveLXAHTR3ai2E9DZUsT8pQ==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.8/xlsx.full.min.js" integrity="sha512-NerWxp37F9TtBS1k1cr2TjyC9c8Qh6ghgqVBOYXaahgnBkVT6a8KVbO05Z8+LnIIom4CJSSQTZ3VbL396scK5w==" crossorigin="anonymous"></script>
+
+
+<body>
+   <div id="tablas">
+     <table  border="6.8"  id="example" class="display" style="width:100% ">
+       <thead>
+         <tr>
+           <!-- <th>Encuesta</th> -->
+           <th>Fecha de Realización</th>
+           <th>Nombre del Jefe</th>
+           <th>Nombre del colaborador</th>
+           <th>Departamento</th>
+           <th>Puesto</th>
+           <th>Nota de validación</th>
+         </tr>
+       </thead>
+       <tbody>
+         {{#users}}
+            <tr>
+                <!-- <td><a>{{nomencuesta}}</a></td> -->
+                <td align="center"><a> {{fecha}}</a></td>
+                <td align="center"><a> {{encargado}}</a></td>
+                <td align="center"><a> {{nombre}}</a></td>
+                <td align="center"><a> {{departamento}}</a></td>
+                <td align="center"><a> {{puesto}}</a></td>
+                <td align="center"><a>{{notafinal}}</a></td>
+              </tr>
+              {{/users}}
+            </tbody>
+      </table>
+          <br>
+      <table border="3" class="display" style="width:100%">
+          <thead>
+              <tr>
+                <th>Área Técnica</th>
+                <th>Calificación</th>
+              </tr>
+            </thead>
+          <tbody>
+            {{#area1}}
+            <tr>
+              <td><a> {{pregunta}}</a></td>
+              <td align="center"><a> {{respuesta}}</a></td>
+            </tr>
+              {{/area1}}
+          </tbody>
+     </table>
+          <br>
+          <table border="3" id="example3" class="display" style="width:100%">
+            <thead>
+              <tr>
+                <th>Área integral</th>
+                <th>Calificación</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#area2}}
+              <tr>
+                <td><a> {{pregunta1}}</a></td>
+                <td align="center"><a> {{respuesta1}}</a></td>
+              </tr>
+              {{/area2}}
+            </tbody>
+          </table>
+					<br>
+					<table border="3" id="example3" class="display" style="width:100%">
+						<thead>
+							<tr>
+								<th>Área seguridad industrial</th>
+								<th>Calificación</th>
+							</tr>
+						</thead>
+						<tbody>
+							{{#area3}}
+							<tr>
+								<td><a>{{pregunta2}}</a></td>
+								<td align="center"><a>{{respuesta2}}</a></td>
+							</tr>
+							{{/area3}}
+						</tbody>
+					</table>
+        </div>
+        <br>
+        <br>
+        <button  class="btn btn-primary btn-xs" id="exportarExcelN" onclick="exportarExcelv2();">Exportar a Excel</button>
+        <a href="http://cursos.mayahonh.com/local/report/encuestas2.php"><button class="btn btn-primary">Regresar al reporte operativo</button></a>
+</body>
+
+<script>
+  function exportarExcelv2() {
+
+    /* creamos el nuevo workbook */
+    var workbook = XLSX.utils.book_new();
+
+    /* convertimos tabla 'tablaOriginal' a un  worksheet llamado "Flota Sana" */
+    var ws1 = XLSX.utils.table_to_sheet(document.getElementById('tablas'));
+    XLSX.utils.book_append_sheet(workbook, ws1, "reporte individual operativo");
+
+    /* exportamos en el libro con los worksheets */
+    XLSX.writeFile(workbook, "reporte individual operativo.xlsx");
+  }
+</script>

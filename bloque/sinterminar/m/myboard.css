@@ -1,0 +1,73 @@
+.c1 {
+    min-width: 300px;
+}
+
+.col_rotated {
+    width: 200px;
+}
+
+table.flexible, .generaltable {
+    display: block;
+    position: relative;
+    overflow: hidden !important;
+}
+
+thead {
+  position: relative;
+  display: block; /*seperates the header from the body allowing it to be positioned*/
+  overflow: visible;
+}
+
+
+tbody tr td:nth-child(1) {
+    position: relative;
+    display: block;
+    background: white;
+}
+
+tbody {
+    position: relative;
+    display: block;
+    overflow: scroll;
+    height: 300px;
+}
+
+.codeName {
+  position: absolute;
+  bottom: 8px;
+  background: white;
+  z-index: 5000;
+}
+
+thead th:nth-child(1) {
+  position:relative;
+  display:block;
+  background: white;
+  z-index:5000;
+  width: 350px;
+  margin-right: 20px;
+}
+
+.codeNameTD {
+  min-width: 370px;
+  max-width: 370px;
+  background: white;
+  z-index: 5000;
+}
+
+.codeCell  {
+    display: inline-block;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-bottom: 0;
+    padding-top: 0;
+    width: 52px;
+}
+
+.nameCell  {
+    display: inline-block;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-bottom: 0;
+    padding-top: 0;
+}

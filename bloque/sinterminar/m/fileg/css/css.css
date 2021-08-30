@@ -1,0 +1,16 @@
+#padre {
+    display: table;
+    height:200px;
+}
+#hijo {
+
+    color : red;
+}
+p {
+
+    color : red;
+}
+h1 {
+
+    color : red;
+}

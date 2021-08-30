@@ -1,0 +1,9 @@
+.reportTable .flexible .header {
+    height: 200px;
+}
+
+.col_rotated {
+    transform: rotate(-90deg);
+    transform-origin: left center 0;
+
+}

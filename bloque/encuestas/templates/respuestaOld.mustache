@@ -1,0 +1,190 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_report/reporte
+
+
+    Example context (json):
+    {
+
+    }
+}}
+
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.23/css/jquery.dataTables.min.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.6.5/css/buttons.dataTables.min.css">
+
+
+<script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/1.6.5/js/dataTables.buttons.min.js"></script>
+<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/1.6.5/js/buttons.html5.min.js"></script>
+
+
+<table id="example" class="display" style="width:100% ">
+    <thead>
+    <tr>
+        <!-- <th>Encuesta</th> -->
+        <th>Fecha de Realización</th>
+        <th>Nombre del Jefe</th>
+        <th>Nombre del colaborador</th>
+        <th>Departamento</th>
+        <th>Puesto</th>
+    </tr>
+    </thead>
+    <tbody>
+  {{#users}}
+        <tr>
+             <!-- <td><a>{{nomencuesta}}</a></td> -->
+             <td><a> {{fecha}}</a></td>
+             <td><a> {{encargado}}</a></td>
+             <td><a> {{nombre}}</a></td>
+             <td><a> {{departamento}}</a></td>
+             <td><a> {{puesto}}</a></td>
+        </tr>
+     {{/users}}
+      </tbody>
+
+</table>
+<br>
+<table id="example" class="display" style="width:100% ">
+    <thead>
+    <tr>
+        <!-- <th>Area tecnica</th> -->
+        <!-- <th>Area integral</th> -->
+        <th>Nota de validación</th>
+        <!-- <th>Resultado</th> -->
+        <!-- <th>Comentario</th> -->
+
+    </tr>
+    </thead>
+    <tbody>
+  {{#users}}
+        <tr>
+             <!-- <td><a> {{nota1}}</a></td> -->
+             <!-- <td><a> {{nota2}}</a></td> -->
+             <td><a> {{notafinal}}</a></td>
+             <!-- <td><a> {{resultado}}</a></td> -->
+             <!-- <td><a> {{comentario}}</a></td> -->
+        </tr>
+     {{/users}}
+      </tbody>
+
+</table>
+<br>
+<table border="1" id="example2" class="display" style="width:100%">
+    <thead>
+    <tr>
+        <th>Área Técnica</th>
+        <th>Calificación</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{#area1}}
+        <tr>
+             <td><a> {{pregunta}}</a></td>
+             <td><a> {{respuesta}}</a></td>
+        </tr>
+    {{/area1}}
+    </tbody>
+</table>
+<br>
+<table border="1" id="example3" class="display" style="width:100%">
+    <thead>
+    <tr>
+        <th>Área integral</th>
+        <th>Calificación</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{#area2}}
+        <tr>
+             <td><a> {{pregunta1}}</a></td>
+             <td><a> {{respuesta1}}</a></td>
+        </tr>
+    {{/area2}}
+    </tbody>
+</table>
+
+<!-- Descarga de excel -->
+<!-- <table border="1" id="example4" class="display" style="width:100%">
+    <thead>
+    <tr> -->
+      <!-- <th>Encuesta</th> -->
+      <!-- <th>Fecha de Realización</th>
+      <th>Nombre del Jefe</th>
+      <th>Nombre del colaborador</th>
+      <th>Departamento</th>
+      <th>Puesto</th> -->
+      <!-- <th>Area tecnica</th> -->
+      <!-- <th>Area integral</th> -->
+      <!-- <th>Nota de validación</th> -->
+      <!-- <th>Resultado</th> -->
+      <!-- <th>Comentario</th> -->
+      <!-- <th>Area tecnica</th>
+      <th>Nota</th>
+      <th>Area integral</th>
+      <th>Nota</th>
+
+    </tr>
+    </thead>
+    <tbody>
+      {{#completo1}}
+            <tr> -->
+
+                 <!-- <td><a>{{nomencuesta}}</a></td> -->
+                 <!-- <td><a> {{fecha}}</a></td>
+                 <td><a> {{encargado}}</a></td>
+                 <td><a> {{nombre}}</a></td>
+                 <td><a> {{departamento}}</a></td>
+                 <td><a> {{puesto}}</a></td>
+                 <!-- <td><a> {{nota1}}</a></td> -->
+                 <!-- <td><a> {{nota2}}</a></td> -->
+                 <!-- <td><a> {{notafinal}}</a></td> -->
+                 <!-- <td><a> {{resultado}}</a></td> -->
+                 <!-- <td><a> {{comentario}}</a></td> -->
+                 <!-- <td><a> {{pregunta}}</a></td>
+                 <td><a> {{respuesta}}</a></td>
+                 <td><a> {{pregunta1}}</a></td>
+                 <td><a> {{respuesta1}}</a></td> -->
+
+            <!-- </tr>
+         {{/completo1}}
+    </tbody>
+</table> -->
+
+  <script>
+      $(document).ready(function() {
+          $('#example4').DataTable( {
+              dom: 'Bfrtip',
+              buttons: [
+                'excelHtml5'
+              ]
+          } );
+      } );
+
+
+
+  </script>
+
+
+
+  <style>
+  #example4{visibility: hidden;}
+  </style>

@@ -1,0 +1,41 @@
+.c0 {
+    width: 210px;
+    background: white;
+}
+
+.col_rotated {
+    width: 200px;
+}
+
+table.flexible, .generaltable {
+    display: block;
+    position: relative;
+    overflow: hidden !important;
+}
+
+thead {
+  position: relative;
+  display: block; /*seperates the header from the body allowing it to be positioned*/
+  overflow: visible;
+}
+
+
+tbody tr td:nth-child(1) {
+    position: relative;
+    display: block;
+}
+
+tbody {
+    position: relative;
+    display: block;
+    overflow: scroll;
+    height: 300px;
+}
+
+thead th:nth-child(1) {
+  position:relative;
+  display:block;
+  background: white;
+  z-index:5000;
+  /* width: 370px; */
+}

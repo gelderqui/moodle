@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="blocks/mcdpde/db" VERSION="20170803" COMMENT="XMLDB file for Moodle blocks/mcdpde"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="mcdpde_abilities" COMMENT="Abilities to show on the report">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="ability" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false" COMMENT="Ability"/>
+        <FIELD NAME="intervaldate" TYPE="int" LENGTH="3" NOTNULL="false" SEQUENCE="false" COMMENT="interval time for calculate valid period of this ability"/>
+        <FIELD NAME="intervaltype" TYPE="char" LENGTH="1" NOTNULL="false" SEQUENCE="false" COMMENT="Char for Interval for Days (d), Monts (m), Years (y)"/>
+        <FIELD NAME="categoriesid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Referencie for categoryid"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="categoriesid_ref" TYPE="foreign" FIELDS="categoriesid" REFTABLE="mcdpde_categories" REFFIELDS="id" COMMENT="referencie for categories id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="mcdpde_ability_competency" COMMENT="Abilities with competency relationship">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="abilityid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Ability id relationship"/>
+        <FIELD NAME="competencyid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Competency id relationship"/>
+        <FIELD NAME="levelab" TYPE="char" LENGTH="1" NOTNULL="false" SEQUENCE="false" COMMENT="Advanced (A) or Basic (B)"/>
+        <FIELD NAME="medal" TYPE="char" LENGTH="1" NOTNULL="false" SEQUENCE="false" COMMENT="medal type, B bronze, P plata, O oro"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="abilitiid_ref" TYPE="foreign" FIELDS="abilityid" REFTABLE="mcdpde_abilities" REFFIELDS="id" COMMENT="Abilities reference"/>
+        <KEY NAME="competency_ref" TYPE="foreign" FIELDS="competencyid" REFTABLE="competency" REFFIELDS="id" COMMENT="Competency reference"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="mcdpde_categories" COMMENT="Categories for abilities">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="name of category"/>
+        <FIELD NAME="position" TYPE="int" LENGTH="5" NOTNULL="false" SEQUENCE="false" COMMENT="order for display info"/>
+        <FIELD NAME="areaid" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="areaid_ref" TYPE="foreign" FIELDS="areaid" REFTABLE="mcdpde_areas" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="mcdpde_config" COMMENT="configurations for mcdpde">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="value" TYPE="char" LENGTH="100" NOTNULL="false" SEQUENCE="false"/>
+      </FIELDS>
+    <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+    </KEYS>
+    </TABLE>
+    <TABLE NAME="mcdpde_areas" COMMENT="Area storing, this will be matches with AREAS from MCD LEA_EMPLEADO_MV entity">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="areaname" TYPE="char" LENGTH="100" NOTNULL="false" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+  </TABLES>
+</XMLDB>

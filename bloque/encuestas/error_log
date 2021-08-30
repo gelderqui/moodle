@@ -1,0 +1,1795 @@
+[12-Feb-2021 16:52:38 America/Guatemala] Default exception handler: Error al leer de la base de datos Debug: 
+
+[array (
+)]
+Error code: dmlreadexception
+* line 486 of /lib/dml/moodle_database.php: dml_read_exception thrown
+* line 1273 of /lib/dml/mysqli_native_moodle_database.php: call to moodle_database->query_end()
+* line 119 of /local/report/usuariosdividido.php: call to mysqli_native_moodle_database->get_records_sql()
+
+[12-Feb-2021 16:53:38 America/Guatemala] Default exception handler: Error al leer de la base de datos Debug: 
+
+[array (
+)]
+Error code: dmlreadexception
+* line 486 of /lib/dml/moodle_database.php: dml_read_exception thrown
+* line 1273 of /lib/dml/mysqli_native_moodle_database.php: call to moodle_database->query_end()
+* line 119 of /local/report/usuariosdividido.php: call to mysqli_native_moodle_database->get_records_sql()
+
+[18-Feb-2021 10:41:31 America/Guatemala] Default exception handler: Error al leer de la base de datos Debug: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'where encabezado.response_id=1' at line 185
+SELECT @s:=@s + 1 id, encabezado.response_id, encabezado.nomencuesta, encabezado.fecha, encabezado.encargado, encabezado.nombre, encabezado.puesto, encabezado.departamento,format(area1.nota,0) as nota1,format(area2.nota,0) as nota2,format(area1.nota+area2.nota,0) as notafinal,
+if(area1.nota+area2.nota>=100,'Muy competente',if(area1.nota+area2.nota>= 90,'Competente',if(area1.nota+area2.nota >= 80,'Necesita reforzamiento','No satisfactorio'))) as resultado,encabezado.comentario
+from
+(select @s:=0) as s,
+(select tempnombre.response_id, tempnombre.nomencuesta, tempnombre.fecha, tempnombre.encargado, tempnombre.nombre, tempnombre.puesto, tempnombre.departamento,tempcomentario.comentario
+from
+(select tempnombre.response_id, tempnombre.nomencuesta,tempnombre.fecha,tempnombre.encargado,tempnombre.nombre, usuario.department as puesto, usuario.city as departamento
+from
+(select qrt1.response_id,q.name as nomencuesta, DATE_FORMAT(DATE_ADD(FROM_UNIXTIME(qr1.submitted, '%Y-%m-%d %h:%i'),INTERVAL 7 HOUR),'%d/%m/%Y %H:%i') AS fecha,CONCAT(u1.firstname, ' ',u1.lastname) as encargado,qrt1.response as nombre
+FROM mdl_user as u1
+inner join mdl_questionnaire_response as qr1
+on u1.id=qr1.userid
+inner join mdl_questionnaire_response_text as qrt1
+on qrt1.response_id=qr1.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt1.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%admin%' and lower(qq.name) LIKE '%nombre%')tempnombre
+left JOIN
+(select CONCAT(usuario1.firstname, ' ',usuario1.lastname) as nombrecompleto,usuario1.department,usuario1.city
+from
+mdl_user as usuario1
+where usuario1.deleted=0)usuario
+on tempnombre.nombre like usuario.nombrecompleto
+order by tempnombre.response_id)tempnombre
+left join
+(select qrt1.response_id,qrt1.response as comentario
+from mdl_questionnaire_response_text as qrt1
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt1.question_id
+where lower(qq.name) LIKE '%comentario%')tempcomentario
+on tempnombre.response_id=tempcomentario.response_id)encabezado
+left JOIN
+(select base.response_id, ((if(suma1.conteo is null , 0,suma1.conteo*70/conteototal.conteo))+(if(suma2.conteo is null , 0,suma2.conteo*65/conteototal.conteo))+(if(suma3.conteo is null , 0,suma3.conteo*55/conteototal.conteo))+(if(suma4.conteo is null , 0,suma4.conteo*50/conteototal.conteo))) as nota
+from
+(select qr2.id as response_id
+from
+mdl_questionnaire_response as qr2
+inner join mdl_questionnaire_response_rank as qrt2
+on qrt2.response_id=qr2.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt2.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%admin%' and lower(qq.name) LIKE '%tecnica%'
+group by qr2.id)base
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%admin%' and lower(qq.name) LIKE '%tecnica%' and qrt.rankvalue=1
+group by qr.id) suma1
+on base.response_id=suma1.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%admin%' and lower(qq.name) LIKE '%tecnica%' and qrt.rankvalue=2
+group by qr.id) suma2
+on base.response_id=suma2.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%admin%' and lower(qq.name) LIKE '%tecnica%' and qrt.rankvalue=3
+group by qr.id) suma3
+on base.response_id=suma3.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%admin%' and lower(qq.name) LIKE '%tecnica%' and qrt.rankvalue=4
+group by qr.id) suma4
+on base.response_id=suma4.response_id
+inner join
+(select qr.id as response_id, count(qrt.rankvalue) as conteo
+from mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%admin%' and lower(qq.name) LIKE '%tecnica%'
+group by qr.id)conteototal
+on base.response_id=conteototal.response_id)area1
+on encabezado.response_id=area1.response_id
+left JOIN
+(select base.response_id, ((if(suma1.conteo is null , 0,suma1.conteo*30/conteototal.conteo))+(if(suma2.conteo is null , 0,suma2.conteo*25/conteototal.conteo))+(if(suma3.conteo is null , 0,suma3.conteo*15/conteototal.conteo))+(if(suma4.conteo is null , 0,suma4.conteo*10/conteototal.conteo))) as nota
+from
+(select qr2.id as response_id
+from
+mdl_questionnaire_response as qr2
+inner join mdl_questionnaire_response_rank as qrt2
+on qrt2.response_id=qr2.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt2.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%admin%' and lower(qq.name) LIKE '%integral%'
+group by qr2.id)base
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%admin%' and lower(qq.name) LIKE '%integral%' and qrt.rankvalue=1
+group by qr.id) suma1
+on base.response_id=suma1.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%admin%' and lower(qq.name) LIKE '%integral%' and qrt.rankvalue=2
+group by qr.id) suma2
+on base.response_id=suma2.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%admin%' and lower(qq.name) LIKE '%integral%' and qrt.rankvalue=3
+group by qr.id) suma3
+on base.response_id=suma3.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%admin%' and lower(qq.name) LIKE '%integral%' and qrt.rankvalue=4
+group by qr.id) suma4
+on base.response_id=suma4.response_id
+inner join
+(select qr.id as response_id, count(qrt.rankvalue) as conteo
+from mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%admin%' and lower(qq.name) LIKE '%integral%'
+group by qr.id)conteototal
+on base.response_id=conteototal.response_id)area2
+on encabezado.response_id=area2.response_id
+order by encabezado.response_id
+where encabezado.response_id=1
+[array (
+)]
+Error code: dmlreadexception
+* line 486 of /lib/dml/moodle_database.php: dml_read_exception thrown
+* line 1273 of /lib/dml/mysqli_native_moodle_database.php: call to moodle_database->query_end()
+* line 240 of /local/report/respuesta.php: call to mysqli_native_moodle_database->get_records_sql()
+
+[18-Feb-2021 10:44:12 America/Guatemala] PHP Notice:  Undefined variable: bandera in /home/u200878855/domains/mayahonh.com/public_html/cursos/local/report/respuesta.php on line 261
+[18-Feb-2021 11:46:15 America/Guatemala] Default exception handler: Error al leer de la base de datos Debug: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '' at line 184
+SELECT @s:=@s + 1 id, encabezado.response_id, encabezado.nomencuesta, encabezado.fecha, encabezado.encargado, encabezado.nombre, encabezado.puesto, encabezado.departamento,format(area1.nota,0) as nota1,format(area2.nota,0) as nota2,format(area1.nota+area2.nota,0) as notafinal,
+if(area1.nota+area2.nota>=100,'Muy competente',if(area1.nota+area2.nota>= 90,'Competente',if(area1.nota+area2.nota >= 80,'Necesita reforzamiento','No satisfactorio'))) as resultado,encabezado.comentario
+from
+(select @s:=0) as s,
+(select tempnombre.response_id, tempnombre.nomencuesta, tempnombre.fecha, tempnombre.encargado, tempnombre.nombre, tempnombre.puesto, tempnombre.departamento,tempcomentario.comentario
+from
+(select tempnombre.response_id, tempnombre.nomencuesta,tempnombre.fecha,tempnombre.encargado,tempnombre.nombre, usuario.department as puesto, usuario.city as departamento
+from
+(select qrt1.response_id,q.name as nomencuesta, DATE_FORMAT(DATE_ADD(FROM_UNIXTIME(qr1.submitted, '%Y-%m-%d %h:%i'),INTERVAL 7 HOUR),'%d/%m/%Y %H:%i') AS fecha,CONCAT(u1.firstname, ' ',u1.lastname) as encargado,qrt1.response as nombre
+FROM mdl_user as u1
+inner join mdl_questionnaire_response as qr1
+on u1.id=qr1.userid
+inner join mdl_questionnaire_response_text as qrt1
+on qrt1.response_id=qr1.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt1.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%admin%' and lower(qq.name) LIKE '%nombre%')tempnombre
+left JOIN
+(select CONCAT(usuario1.firstname, ' ',usuario1.lastname) as nombrecompleto,usuario1.department,usuario1.city
+from
+mdl_user as usuario1
+where usuario1.deleted=0)usuario
+on tempnombre.nombre like usuario.nombrecompleto
+order by tempnombre.response_id)tempnombre
+left join
+(select qrt1.response_id,qrt1.response as comentario
+from mdl_questionnaire_response_text as qrt1
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt1.question_id
+where lower(qq.name) LIKE '%comentario%')tempcomentario
+on tempnombre.response_id=tempcomentario.response_id)encabezado
+left JOIN
+(select base.response_id, ((if(suma1.conteo is null , 0,suma1.conteo*70/conteototal.conteo))+(if(suma2.conteo is null , 0,suma2.conteo*65/conteototal.conteo))+(if(suma3.conteo is null , 0,suma3.conteo*55/conteototal.conteo))+(if(suma4.conteo is null , 0,suma4.conteo*50/conteototal.conteo))) as nota
+from
+(select qr2.id as response_id
+from
+mdl_questionnaire_response as qr2
+inner join mdl_questionnaire_response_rank as qrt2
+on qrt2.response_id=qr2.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt2.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%admin%' and lower(qq.name) LIKE '%tecnica%'
+group by qr2.id)base
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%admin%' and lower(qq.name) LIKE '%tecnica%' and qrt.rankvalue=1
+group by qr.id) suma1
+on base.response_id=suma1.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%admin%' and lower(qq.name) LIKE '%tecnica%' and qrt.rankvalue=2
+group by qr.id) suma2
+on base.response_id=suma2.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%admin%' and lower(qq.name) LIKE '%tecnica%' and qrt.rankvalue=3
+group by qr.id) suma3
+on base.response_id=suma3.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%admin%' and lower(qq.name) LIKE '%tecnica%' and qrt.rankvalue=4
+group by qr.id) suma4
+on base.response_id=suma4.response_id
+inner join
+(select qr.id as response_id, count(qrt.rankvalue) as conteo
+from mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%admin%' and lower(qq.name) LIKE '%tecnica%'
+group by qr.id)conteototal
+on base.response_id=conteototal.response_id)area1
+on encabezado.response_id=area1.response_id
+left JOIN
+(select base.response_id, ((if(suma1.conteo is null , 0,suma1.conteo*30/conteototal.conteo))+(if(suma2.conteo is null , 0,suma2.conteo*25/conteototal.conteo))+(if(suma3.conteo is null , 0,suma3.conteo*15/conteototal.conteo))+(if(suma4.conteo is null , 0,suma4.conteo*10/conteototal.conteo))) as nota
+from
+(select qr2.id as response_id
+from
+mdl_questionnaire_response as qr2
+inner join mdl_questionnaire_response_rank as qrt2
+on qrt2.response_id=qr2.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt2.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%admin%' and lower(qq.name) LIKE '%integral%'
+group by qr2.id)base
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%admin%' and lower(qq.name) LIKE '%integral%' and qrt.rankvalue=1
+group by qr.id) suma1
+on base.response_id=suma1.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%admin%' and lower(qq.name) LIKE '%integral%' and qrt.rankvalue=2
+group by qr.id) suma2
+on base.response_id=suma2.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%admin%' and lower(qq.name) LIKE '%integral%' and qrt.rankvalue=3
+group by qr.id) suma3
+on base.response_id=suma3.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%admin%' and lower(qq.name) LIKE '%integral%' and qrt.rankvalue=4
+group by qr.id) suma4
+on base.response_id=suma4.response_id
+inner join
+(select qr.id as response_id, count(qrt.rankvalue) as conteo
+from mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%admin%' and lower(qq.name) LIKE '%integral%'
+group by qr.id)conteototal
+on base.response_id=conteototal.response_id)area2
+on encabezado.response_id=area2.response_id
+where encabezado.response_id=
+[array (
+)]
+Error code: dmlreadexception
+* line 486 of /lib/dml/moodle_database.php: dml_read_exception thrown
+* line 1273 of /lib/dml/mysqli_native_moodle_database.php: call to moodle_database->query_end()
+* line 242 of /local/report/respuesta.php: call to mysqli_native_moodle_database->get_records_sql()
+
+[21-Feb-2021 23:55:48 America/Guatemala] Default exception handler: Error al leer de la base de datos Debug: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '' at line 184
+SELECT @s:=@s + 1 id, encabezado.response_id, encabezado.nomencuesta, encabezado.fecha, encabezado.encargado, encabezado.nombre, encabezado.puesto, encabezado.departamento,format(area1.nota,0) as nota1,format(area2.nota,0) as nota2,format(area1.nota+area2.nota,0) as notafinal,
+if(area1.nota+area2.nota>=100,'Muy competente',if(area1.nota+area2.nota>= 90,'Competente',if(area1.nota+area2.nota >= 80,'Necesita reforzamiento','No satisfactorio'))) as resultado,encabezado.comentario
+from
+(select @s:=0) as s,
+(select tempnombre.response_id, tempnombre.nomencuesta, tempnombre.fecha, tempnombre.encargado, tempnombre.nombre, tempnombre.puesto, tempnombre.departamento,tempcomentario.comentario
+from
+(select tempnombre.response_id, tempnombre.nomencuesta,tempnombre.fecha,tempnombre.encargado,tempnombre.nombre, usuario.department as puesto, usuario.city as departamento
+from
+(select qrt1.response_id,q.name as nomencuesta, DATE_FORMAT(DATE_ADD(FROM_UNIXTIME(qr1.submitted, '%Y-%m-%d %h:%i'),INTERVAL 7 HOUR),'%d/%m/%Y %H:%i') AS fecha,CONCAT(u1.firstname, ' ',u1.lastname) as encargado,qrt1.response as nombre
+FROM mdl_user as u1
+inner join mdl_questionnaire_response as qr1
+on u1.id=qr1.userid
+inner join mdl_questionnaire_response_text as qrt1
+on qrt1.response_id=qr1.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt1.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%admin%' and lower(qq.name) LIKE '%nombre%')tempnombre
+left JOIN
+(select CONCAT(usuario1.firstname, ' ',usuario1.lastname) as nombrecompleto,usuario1.department,usuario1.city
+from
+mdl_user as usuario1
+where usuario1.deleted=0)usuario
+on tempnombre.nombre like usuario.nombrecompleto
+order by tempnombre.response_id)tempnombre
+left join
+(select qrt1.response_id,qrt1.response as comentario
+from mdl_questionnaire_response_text as qrt1
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt1.question_id
+where lower(qq.name) LIKE '%comentario%')tempcomentario
+on tempnombre.response_id=tempcomentario.response_id)encabezado
+left JOIN
+(select base.response_id, ((if(suma1.conteo is null , 0,suma1.conteo*70/conteototal.conteo))+(if(suma2.conteo is null , 0,suma2.conteo*65/conteototal.conteo))+(if(suma3.conteo is null , 0,suma3.conteo*55/conteototal.conteo))+(if(suma4.conteo is null , 0,suma4.conteo*50/conteototal.conteo))) as nota
+from
+(select qr2.id as response_id
+from
+mdl_questionnaire_response as qr2
+inner join mdl_questionnaire_response_rank as qrt2
+on qrt2.response_id=qr2.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt2.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%admin%' and lower(qq.name) LIKE '%tecnica%'
+group by qr2.id)base
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%admin%' and lower(qq.name) LIKE '%tecnica%' and qrt.rankvalue=1
+group by qr.id) suma1
+on base.response_id=suma1.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%admin%' and lower(qq.name) LIKE '%tecnica%' and qrt.rankvalue=2
+group by qr.id) suma2
+on base.response_id=suma2.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%admin%' and lower(qq.name) LIKE '%tecnica%' and qrt.rankvalue=3
+group by qr.id) suma3
+on base.response_id=suma3.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%admin%' and lower(qq.name) LIKE '%tecnica%' and qrt.rankvalue=4
+group by qr.id) suma4
+on base.response_id=suma4.response_id
+inner join
+(select qr.id as response_id, count(qrt.rankvalue) as conteo
+from mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%admin%' and lower(qq.name) LIKE '%tecnica%'
+group by qr.id)conteototal
+on base.response_id=conteototal.response_id)area1
+on encabezado.response_id=area1.response_id
+left JOIN
+(select base.response_id, ((if(suma1.conteo is null , 0,suma1.conteo*30/conteototal.conteo))+(if(suma2.conteo is null , 0,suma2.conteo*25/conteototal.conteo))+(if(suma3.conteo is null , 0,suma3.conteo*15/conteototal.conteo))+(if(suma4.conteo is null , 0,suma4.conteo*10/conteototal.conteo))) as nota
+from
+(select qr2.id as response_id
+from
+mdl_questionnaire_response as qr2
+inner join mdl_questionnaire_response_rank as qrt2
+on qrt2.response_id=qr2.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt2.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%admin%' and lower(qq.name) LIKE '%integral%'
+group by qr2.id)base
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%admin%' and lower(qq.name) LIKE '%integral%' and qrt.rankvalue=1
+group by qr.id) suma1
+on base.response_id=suma1.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%admin%' and lower(qq.name) LIKE '%integral%' and qrt.rankvalue=2
+group by qr.id) suma2
+on base.response_id=suma2.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%admin%' and lower(qq.name) LIKE '%integral%' and qrt.rankvalue=3
+group by qr.id) suma3
+on base.response_id=suma3.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%admin%' and lower(qq.name) LIKE '%integral%' and qrt.rankvalue=4
+group by qr.id) suma4
+on base.response_id=suma4.response_id
+inner join
+(select qr.id as response_id, count(qrt.rankvalue) as conteo
+from mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%admin%' and lower(qq.name) LIKE '%integral%'
+group by qr.id)conteototal
+on base.response_id=conteototal.response_id)area2
+on encabezado.response_id=area2.response_id
+where encabezado.response_id=
+[array (
+)]
+Error code: dmlreadexception
+* line 486 of /lib/dml/moodle_database.php: dml_read_exception thrown
+* line 1273 of /lib/dml/mysqli_native_moodle_database.php: call to moodle_database->query_end()
+* line 242 of /local/report/respuesta.php: call to mysqli_native_moodle_database->get_records_sql()
+
+[22-Feb-2021 00:54:18 America/Guatemala] Default exception handler: Excepción - Nesting error: users1 (on line 54) vs. users (on line 61) Debug: 
+Error code: generalexceptionmessage
+* line 126 of /lib/mustache/src/Mustache/Parser.php: Mustache_Exception_SyntaxException thrown
+* line 105 of /lib/mustache/src/Mustache/Parser.php: call to Mustache_Parser->buildTree()
+* line 43 of /lib/mustache/src/Mustache/Parser.php: call to Mustache_Parser->buildTree()
+* line 783 of /lib/mustache/src/Mustache/Engine.php: call to Mustache_Parser->parse()
+* line 808 of /lib/mustache/src/Mustache/Engine.php: call to Mustache_Engine->parse()
+* line 738 of /lib/mustache/src/Mustache/Engine.php: call to Mustache_Engine->compile()
+* line 657 of /lib/mustache/src/Mustache/Engine.php: call to Mustache_Engine->loadSource()
+* line 188 of /lib/outputrenderers.php: call to Mustache_Engine->loadTemplate()
+* line 306 of /local/report/respuesta.php: call to renderer_base->render_from_template()
+
+[22-Feb-2021 00:55:03 America/Guatemala] Default exception handler: Excepción - Nesting error: users1 (on line 54) vs. users (on line 59) Debug: 
+Error code: generalexceptionmessage
+* line 126 of /lib/mustache/src/Mustache/Parser.php: Mustache_Exception_SyntaxException thrown
+* line 105 of /lib/mustache/src/Mustache/Parser.php: call to Mustache_Parser->buildTree()
+* line 43 of /lib/mustache/src/Mustache/Parser.php: call to Mustache_Parser->buildTree()
+* line 783 of /lib/mustache/src/Mustache/Engine.php: call to Mustache_Parser->parse()
+* line 808 of /lib/mustache/src/Mustache/Engine.php: call to Mustache_Engine->parse()
+* line 738 of /lib/mustache/src/Mustache/Engine.php: call to Mustache_Engine->compile()
+* line 657 of /lib/mustache/src/Mustache/Engine.php: call to Mustache_Engine->loadSource()
+* line 188 of /lib/outputrenderers.php: call to Mustache_Engine->loadTemplate()
+* line 306 of /local/report/respuesta.php: call to renderer_base->render_from_template()
+
+[23-Feb-2021 13:59:44 America/Guatemala] Default exception handler: Error al leer de la base de datos Debug: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'select base.response_id, ((if(suma1.conteo is null , 0,suma1.conteo*15/conteo...' at line 184
+SELECT @s:=@s + 1 id, encabezado.response_id, encabezado.nomencuesta, encabezado.fecha, encabezado.encargado, encabezado.nombre, encabezado.puesto, encabezado.departamento,format(area1.nota,0) as nota1,format(area2.nota,0) as nota2,format(area1.nota+area2.nota,0) as notafinal,
+if(area1.nota+area2.nota>=100,'Muy competente',if(area1.nota+area2.nota>= 90,'Competente',if(area1.nota+area2.nota >= 80,'Necesita reforzamiento','No satisfactorio'))) as resultado,encabezado.comentario
+from
+(select @s:=0) as s,
+(select tempnombre.response_id, tempnombre.nomencuesta, tempnombre.fecha, tempnombre.encargado, tempnombre.nombre, tempnombre.puesto, tempnombre.departamento,tempcomentario.comentario
+from
+(select tempnombre.response_id, tempnombre.nomencuesta,tempnombre.fecha,tempnombre.encargado,tempnombre.nombre, usuario.department as puesto, usuario.city as departamento
+from
+(select qrt1.response_id,q.name as nomencuesta, DATE_FORMAT(DATE_ADD(FROM_UNIXTIME(qr1.submitted, '%Y-%m-%d %h:%i'),INTERVAL 7 HOUR),'%d/%m/%Y %H:%i') AS fecha,CONCAT(u1.firstname, ' ',u1.lastname) as encargado,qrt1.response as nombre
+FROM mdl_user as u1
+inner join mdl_questionnaire_response as qr1
+on u1.id=qr1.userid
+inner join mdl_questionnaire_response_text as qrt1
+on qrt1.response_id=qr1.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt1.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%admin%' and lower(qq.name) LIKE '%nombre%')tempnombre
+left JOIN
+(select CONCAT(usuario1.firstname, ' ',usuario1.lastname) as nombrecompleto,usuario1.department,usuario1.city
+from
+mdl_user as usuario1
+where usuario1.deleted=0)usuario
+on tempnombre.nombre like usuario.nombrecompleto
+order by tempnombre.response_id)tempnombre
+left join
+(select qrt1.response_id,qrt1.response as comentario
+from mdl_questionnaire_response_text as qrt1
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt1.question_id
+where lower(qq.name) LIKE '%comentario%')tempcomentario
+on tempnombre.response_id=tempcomentario.response_id)encabezado
+left JOIN
+(select base.response_id, ((if(suma1.conteo is null , 0,suma1.conteo*70/conteototal.conteo))+(if(suma2.conteo is null , 0,suma2.conteo*65/conteototal.conteo))+(if(suma3.conteo is null , 0,suma3.conteo*55/conteototal.conteo))+(if(suma4.conteo is null , 0,suma4.conteo*50/conteototal.conteo))) as nota
+from
+(select qr2.id as response_id
+from
+mdl_questionnaire_response as qr2
+inner join mdl_questionnaire_response_rank as qrt2
+on qrt2.response_id=qr2.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt2.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%admin%' and lower(qq.name) LIKE '%tecnica%'
+group by qr2.id)base
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%admin%' and lower(qq.name) LIKE '%tecnica%' and qrt.rankvalue=1
+group by qr.id) suma1
+on base.response_id=suma1.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%admin%' and lower(qq.name) LIKE '%tecnica%' and qrt.rankvalue=2
+group by qr.id) suma2
+on base.response_id=suma2.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%admin%' and lower(qq.name) LIKE '%tecnica%' and qrt.rankvalue=3
+group by qr.id) suma3
+on base.response_id=suma3.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%admin%' and lower(qq.name) LIKE '%tecnica%' and qrt.rankvalue=4
+group by qr.id) suma4
+on base.response_id=suma4.response_id
+inner join
+(select qr.id as response_id, count(qrt.rankvalue) as conteo
+from mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%admin%' and lower(qq.name) LIKE '%tecnica%'
+group by qr.id)conteototal
+on base.response_id=conteototal.response_id)area1
+on encabezado.response_id=area1.response_id
+left JOIN
+(select base.response_id, ((if(suma1.conteo is null , 0,suma1.conteo*30/conteototal.conteo))+(if(suma2.conteo is null , 0,suma2.conteo*25/conteototal.conteo))+(if(suma3.conteo is null , 0,suma3.conteo*15/conteototal.conteo))+(if(suma4.conteo is null , 0,suma4.conteo*10/conteototal.conteo))) as nota
+from
+(select qr2.id as response_id
+from
+mdl_questionnaire_response as qr2
+inner join mdl_questionnaire_response_rank as qrt2
+on qrt2.response_id=qr2.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt2.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%admin%' and lower(qq.name) LIKE '%integral%'
+group by qr2.id)base
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%admin%' and lower(qq.name) LIKE '%integral%' and qrt.rankvalue=1
+group by qr.id) suma1
+on base.response_id=suma1.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%admin%' and lower(qq.name) LIKE '%integral%' and qrt.rankvalue=2
+group by qr.id) suma2
+on base.response_id=suma2.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%admin%' and lower(qq.name) LIKE '%integral%' and qrt.rankvalue=3
+group by qr.id) suma3
+on base.response_id=suma3.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%admin%' and lower(qq.name) LIKE '%integral%' and qrt.rankvalue=4
+group by qr.id) suma4
+on base.response_id=suma4.response_id
+inner join
+(select qr.id as response_id, count(qrt.rankvalue) as conteo
+from mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%admin%' and lower(qq.name) LIKE '%integral%'
+group by qr.id)conteototal
+on base.response_id=conteototal.response_id)area2
+on encabezado.response_id=area2.response_id
+(select base.response_id, ((if(suma1.conteo is null , 0,suma1.conteo*15/conteototal.conteo))+(if(suma2.conteo is null , 0,suma2.conteo*12/conteototal.conteo))+(if(suma3.conteo is null , 0,suma3.conteo*9/conteototal.conteo))+(if(suma4.conteo is null , 0,suma4.conteo*6/conteototal.conteo))) as nota
+from
+(select qr2.id as response_id
+from
+mdl_questionnaire_response as qr2
+inner join mdl_questionnaire_response_rank as qrt2
+on qrt2.response_id=qr2.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt2.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%%' and lower(qq.name) LIKE '%seguridad%'
+group by qr2.id)base
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%%' and lower(qq.name) LIKE '%seguridad%' and qrt.rankvalue=1
+group by qr.id) suma1
+on base.response_id=suma1.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%%' and lower(qq.name) LIKE '%seguridad%' and qrt.rankvalue=2
+group by qr.id) suma2
+on base.response_id=suma2.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%%' and lower(qq.name) LIKE '%seguridad%' and qrt.rankvalue=3
+group by qr.id) suma3
+on base.response_id=suma3.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%%' and lower(qq.name) LIKE '%seguridad%' and qrt.rankvalue=4
+group by qr.id) suma4
+on base.response_id=suma4.response_id
+inner join
+(select qr.id as response_id, count(qrt.rankvalue) as conteo
+from mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%%' and lower(qq.name) LIKE '%seguridad%'
+group by qr.id)conteototal
+on base.response_id=conteototal.response_id)area3
+on encabezado.response_id=area3.response_id
+where encabezado.response_id=11
+[array (
+)]
+Error code: dmlreadexception
+* line 486 of /lib/dml/moodle_database.php: dml_read_exception thrown
+* line 1273 of /lib/dml/mysqli_native_moodle_database.php: call to moodle_database->query_end()
+* line 316 of /local/report/respuesta2.php: call to mysqli_native_moodle_database->get_records_sql()
+
+[23-Feb-2021 14:01:07 America/Guatemala] Default exception handler: Error al leer de la base de datos Debug: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'select base.response_id, ((if(suma1.conteo is null , 0,suma1.conteo*15/conteo...' at line 184
+SELECT @s:=@s + 1 id, encabezado.response_id, encabezado.nomencuesta, encabezado.fecha, encabezado.encargado, encabezado.nombre, encabezado.puesto, encabezado.departamento,format(area1.nota,0) as nota1,format(area2.nota,0) as nota2,format(area1.nota+area2.nota,0) as notafinal,
+if(area1.nota+area2.nota>=100,'Muy competente',if(area1.nota+area2.nota>= 90,'Competente',if(area1.nota+area2.nota >= 80,'Necesita reforzamiento','No satisfactorio'))) as resultado,encabezado.comentario
+from
+(select @s:=0) as s,
+(select tempnombre.response_id, tempnombre.nomencuesta, tempnombre.fecha, tempnombre.encargado, tempnombre.nombre, tempnombre.puesto, tempnombre.departamento,tempcomentario.comentario
+from
+(select tempnombre.response_id, tempnombre.nomencuesta,tempnombre.fecha,tempnombre.encargado,tempnombre.nombre, usuario.department as puesto, usuario.city as departamento
+from
+(select qrt1.response_id,q.name as nomencuesta, DATE_FORMAT(DATE_ADD(FROM_UNIXTIME(qr1.submitted, '%Y-%m-%d %h:%i'),INTERVAL 7 HOUR),'%d/%m/%Y %H:%i') AS fecha,CONCAT(u1.firstname, ' ',u1.lastname) as encargado,qrt1.response as nombre
+FROM mdl_user as u1
+inner join mdl_questionnaire_response as qr1
+on u1.id=qr1.userid
+inner join mdl_questionnaire_response_text as qrt1
+on qrt1.response_id=qr1.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt1.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%opera%' and lower(qq.name) LIKE '%nombre%')tempnombre
+left JOIN
+(select CONCAT(usuario1.firstname, ' ',usuario1.lastname) as nombrecompleto,usuario1.department,usuario1.city
+from
+mdl_user as usuario1
+where usuario1.deleted=0)usuario
+on tempnombre.nombre like usuario.nombrecompleto
+order by tempnombre.response_id)tempnombre
+left join
+(select qrt1.response_id,qrt1.response as comentario
+from mdl_questionnaire_response_text as qrt1
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt1.question_id
+where lower(qq.name) LIKE '%comentario%')tempcomentario
+on tempnombre.response_id=tempcomentario.response_id)encabezado
+left JOIN
+(select base.response_id, ((if(suma1.conteo is null , 0,suma1.conteo*70/conteototal.conteo))+(if(suma2.conteo is null , 0,suma2.conteo*65/conteototal.conteo))+(if(suma3.conteo is null , 0,suma3.conteo*55/conteototal.conteo))+(if(suma4.conteo is null , 0,suma4.conteo*50/conteototal.conteo))) as nota
+from
+(select qr2.id as response_id
+from
+mdl_questionnaire_response as qr2
+inner join mdl_questionnaire_response_rank as qrt2
+on qrt2.response_id=qr2.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt2.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%opera%' and lower(qq.name) LIKE '%tecnica%'
+group by qr2.id)base
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%opera%' and lower(qq.name) LIKE '%tecnica%' and qrt.rankvalue=1
+group by qr.id) suma1
+on base.response_id=suma1.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%opera%' and lower(qq.name) LIKE '%tecnica%' and qrt.rankvalue=2
+group by qr.id) suma2
+on base.response_id=suma2.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%opera%' and lower(qq.name) LIKE '%tecnica%' and qrt.rankvalue=3
+group by qr.id) suma3
+on base.response_id=suma3.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%opera%' and lower(qq.name) LIKE '%tecnica%' and qrt.rankvalue=4
+group by qr.id) suma4
+on base.response_id=suma4.response_id
+inner join
+(select qr.id as response_id, count(qrt.rankvalue) as conteo
+from mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%opera%' and lower(qq.name) LIKE '%tecnica%'
+group by qr.id)conteototal
+on base.response_id=conteototal.response_id)area1
+on encabezado.response_id=area1.response_id
+left JOIN
+(select base.response_id, ((if(suma1.conteo is null , 0,suma1.conteo*30/conteototal.conteo))+(if(suma2.conteo is null , 0,suma2.conteo*25/conteototal.conteo))+(if(suma3.conteo is null , 0,suma3.conteo*15/conteototal.conteo))+(if(suma4.conteo is null , 0,suma4.conteo*10/conteototal.conteo))) as nota
+from
+(select qr2.id as response_id
+from
+mdl_questionnaire_response as qr2
+inner join mdl_questionnaire_response_rank as qrt2
+on qrt2.response_id=qr2.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt2.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%opera%' and lower(qq.name) LIKE '%integral%'
+group by qr2.id)base
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%opera%' and lower(qq.name) LIKE '%integral%' and qrt.rankvalue=1
+group by qr.id) suma1
+on base.response_id=suma1.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%opera%' and lower(qq.name) LIKE '%integral%' and qrt.rankvalue=2
+group by qr.id) suma2
+on base.response_id=suma2.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%opera%' and lower(qq.name) LIKE '%integral%' and qrt.rankvalue=3
+group by qr.id) suma3
+on base.response_id=suma3.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%opera%' and lower(qq.name) LIKE '%integral%' and qrt.rankvalue=4
+group by qr.id) suma4
+on base.response_id=suma4.response_id
+inner join
+(select qr.id as response_id, count(qrt.rankvalue) as conteo
+from mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%opera%' and lower(qq.name) LIKE '%integral%'
+group by qr.id)conteototal
+on base.response_id=conteototal.response_id)area2
+on encabezado.response_id=area2.response_id
+(select base.response_id, ((if(suma1.conteo is null , 0,suma1.conteo*15/conteototal.conteo))+(if(suma2.conteo is null , 0,suma2.conteo*12/conteototal.conteo))+(if(suma3.conteo is null , 0,suma3.conteo*9/conteototal.conteo))+(if(suma4.conteo is null , 0,suma4.conteo*6/conteototal.conteo))) as nota
+from
+(select qr2.id as response_id
+from
+mdl_questionnaire_response as qr2
+inner join mdl_questionnaire_response_rank as qrt2
+on qrt2.response_id=qr2.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt2.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%opera%' and lower(qq.name) LIKE '%seguridad%'
+group by qr2.id)base
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%opera%' and lower(qq.name) LIKE '%seguridad%' and qrt.rankvalue=1
+group by qr.id) suma1
+on base.response_id=suma1.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%opera%' and lower(qq.name) LIKE '%seguridad%' and qrt.rankvalue=2
+group by qr.id) suma2
+on base.response_id=suma2.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%opera%' and lower(qq.name) LIKE '%seguridad%' and qrt.rankvalue=3
+group by qr.id) suma3
+on base.response_id=suma3.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%opera%' and lower(qq.name) LIKE '%seguridad%' and qrt.rankvalue=4
+group by qr.id) suma4
+on base.response_id=suma4.response_id
+inner join
+(select qr.id as response_id, count(qrt.rankvalue) as conteo
+from mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%opera%' and lower(qq.name) LIKE '%seguridad%'
+group by qr.id)conteototal
+on base.response_id=conteototal.response_id)area3
+on encabezado.response_id=area3.response_id
+where encabezado.response_id=11
+[array (
+)]
+Error code: dmlreadexception
+* line 486 of /lib/dml/moodle_database.php: dml_read_exception thrown
+* line 1273 of /lib/dml/mysqli_native_moodle_database.php: call to moodle_database->query_end()
+* line 316 of /local/report/respuesta2.php: call to mysqli_native_moodle_database->get_records_sql()
+
+[23-Feb-2021 14:02:15 America/Guatemala] Default exception handler: Error al leer de la base de datos Debug: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'select base.response_id, ((if(suma1.conteo is null , 0,suma1.conteo*15/conteo...' at line 184
+SELECT @s:=@s + 1 id, encabezado.response_id, encabezado.nomencuesta, encabezado.fecha, encabezado.encargado, encabezado.nombre, encabezado.puesto, encabezado.departamento,format(area1.nota,0) as nota1,format(area2.nota,0) as nota2,format(area1.nota+area2.nota,0) as notafinal,
+if(area1.nota+area2.nota>=100,'Muy competente',if(area1.nota+area2.nota>= 90,'Competente',if(area1.nota+area2.nota >= 80,'Necesita reforzamiento','No satisfactorio'))) as resultado,encabezado.comentario
+from
+(select @s:=0) as s,
+(select tempnombre.response_id, tempnombre.nomencuesta, tempnombre.fecha, tempnombre.encargado, tempnombre.nombre, tempnombre.puesto, tempnombre.departamento,tempcomentario.comentario
+from
+(select tempnombre.response_id, tempnombre.nomencuesta,tempnombre.fecha,tempnombre.encargado,tempnombre.nombre, usuario.department as puesto, usuario.city as departamento
+from
+(select qrt1.response_id,q.name as nomencuesta, DATE_FORMAT(DATE_ADD(FROM_UNIXTIME(qr1.submitted, '%Y-%m-%d %h:%i'),INTERVAL 7 HOUR),'%d/%m/%Y %H:%i') AS fecha,CONCAT(u1.firstname, ' ',u1.lastname) as encargado,qrt1.response as nombre
+FROM mdl_user as u1
+inner join mdl_questionnaire_response as qr1
+on u1.id=qr1.userid
+inner join mdl_questionnaire_response_text as qrt1
+on qrt1.response_id=qr1.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt1.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%opera%' and lower(qq.name) LIKE '%nombre%')tempnombre
+left JOIN
+(select CONCAT(usuario1.firstname, ' ',usuario1.lastname) as nombrecompleto,usuario1.department,usuario1.city
+from
+mdl_user as usuario1
+where usuario1.deleted=0)usuario
+on tempnombre.nombre like usuario.nombrecompleto
+order by tempnombre.response_id)tempnombre
+left join
+(select qrt1.response_id,qrt1.response as comentario
+from mdl_questionnaire_response_text as qrt1
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt1.question_id
+where lower(qq.name) LIKE '%comentario%')tempcomentario
+on tempnombre.response_id=tempcomentario.response_id)encabezado
+left JOIN
+(select base.response_id, ((if(suma1.conteo is null , 0,suma1.conteo*70/conteototal.conteo))+(if(suma2.conteo is null , 0,suma2.conteo*65/conteototal.conteo))+(if(suma3.conteo is null , 0,suma3.conteo*55/conteototal.conteo))+(if(suma4.conteo is null , 0,suma4.conteo*50/conteototal.conteo))) as nota
+from
+(select qr2.id as response_id
+from
+mdl_questionnaire_response as qr2
+inner join mdl_questionnaire_response_rank as qrt2
+on qrt2.response_id=qr2.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt2.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%opera%' and lower(qq.name) LIKE '%tecnica%'
+group by qr2.id)base
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%opera%' and lower(qq.name) LIKE '%tecnica%' and qrt.rankvalue=1
+group by qr.id) suma1
+on base.response_id=suma1.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%opera%' and lower(qq.name) LIKE '%tecnica%' and qrt.rankvalue=2
+group by qr.id) suma2
+on base.response_id=suma2.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%opera%' and lower(qq.name) LIKE '%tecnica%' and qrt.rankvalue=3
+group by qr.id) suma3
+on base.response_id=suma3.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%opera%' and lower(qq.name) LIKE '%tecnica%' and qrt.rankvalue=4
+group by qr.id) suma4
+on base.response_id=suma4.response_id
+inner join
+(select qr.id as response_id, count(qrt.rankvalue) as conteo
+from mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%opera%' and lower(qq.name) LIKE '%tecnica%'
+group by qr.id)conteototal
+on base.response_id=conteototal.response_id)area1
+on encabezado.response_id=area1.response_id
+left JOIN
+(select base.response_id, ((if(suma1.conteo is null , 0,suma1.conteo*30/conteototal.conteo))+(if(suma2.conteo is null , 0,suma2.conteo*25/conteototal.conteo))+(if(suma3.conteo is null , 0,suma3.conteo*15/conteototal.conteo))+(if(suma4.conteo is null , 0,suma4.conteo*10/conteototal.conteo))) as nota
+from
+(select qr2.id as response_id
+from
+mdl_questionnaire_response as qr2
+inner join mdl_questionnaire_response_rank as qrt2
+on qrt2.response_id=qr2.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt2.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%opera%' and lower(qq.name) LIKE '%integral%'
+group by qr2.id)base
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%opera%' and lower(qq.name) LIKE '%integral%' and qrt.rankvalue=1
+group by qr.id) suma1
+on base.response_id=suma1.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%opera%' and lower(qq.name) LIKE '%integral%' and qrt.rankvalue=2
+group by qr.id) suma2
+on base.response_id=suma2.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%opera%' and lower(qq.name) LIKE '%integral%' and qrt.rankvalue=3
+group by qr.id) suma3
+on base.response_id=suma3.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%opera%' and lower(qq.name) LIKE '%integral%' and qrt.rankvalue=4
+group by qr.id) suma4
+on base.response_id=suma4.response_id
+inner join
+(select qr.id as response_id, count(qrt.rankvalue) as conteo
+from mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%opera%' and lower(qq.name) LIKE '%integral%'
+group by qr.id)conteototal
+on base.response_id=conteototal.response_id)area2
+on encabezado.response_id=area2.response_id
+(select base.response_id, ((if(suma1.conteo is null , 0,suma1.conteo*15/conteototal.conteo))+(if(suma2.conteo is null , 0,suma2.conteo*12/conteototal.conteo))+(if(suma3.conteo is null , 0,suma3.conteo*9/conteototal.conteo))+(if(suma4.conteo is null , 0,suma4.conteo*6/conteototal.conteo))) as nota
+from
+(select qr2.id as response_id
+from
+mdl_questionnaire_response as qr2
+inner join mdl_questionnaire_response_rank as qrt2
+on qrt2.response_id=qr2.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt2.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%opera%' and lower(qq.name) LIKE '%seguridad%'
+group by qr2.id)base
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%opera%' and lower(qq.name) LIKE '%seguridad%' and qrt.rankvalue=1
+group by qr.id) suma1
+on base.response_id=suma1.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%opera%' and lower(qq.name) LIKE '%seguridad%' and qrt.rankvalue=2
+group by qr.id) suma2
+on base.response_id=suma2.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%opera%' and lower(qq.name) LIKE '%seguridad%' and qrt.rankvalue=3
+group by qr.id) suma3
+on base.response_id=suma3.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%opera%' and lower(qq.name) LIKE '%seguridad%' and qrt.rankvalue=4
+group by qr.id) suma4
+on base.response_id=suma4.response_id
+inner join
+(select qr.id as response_id, count(qrt.rankvalue) as conteo
+from mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%opera%' and lower(qq.name) LIKE '%seguridad%'
+group by qr.id)conteototal
+on base.response_id=conteototal.response_id)area3
+on encabezado.response_id=area3.response_id
+where encabezado.response_id=11
+[array (
+)]
+Error code: dmlreadexception
+* line 486 of /lib/dml/moodle_database.php: dml_read_exception thrown
+* line 1273 of /lib/dml/mysqli_native_moodle_database.php: call to moodle_database->query_end()
+* line 316 of /local/report/respuesta2.php: call to mysqli_native_moodle_database->get_records_sql()
+
+[23-Feb-2021 14:34:51 America/Guatemala] Default exception handler: Error al leer de la base de datos Debug: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'select base.response_id, ((if(suma1.conteo is null , 0,suma1.conteo*15/conteo...' at line 184
+SELECT @s:=@s + 1 id, encabezado.response_id, encabezado.nomencuesta, encabezado.fecha, encabezado.encargado, encabezado.nombre, encabezado.puesto, encabezado.departamento,format(area1.nota,0) as nota1,format(area2.nota,0) as nota2,format(area1.nota+area2.nota,0) as notafinal,
+if(area1.nota+area2.nota>=100,'Muy competente',if(area1.nota+area2.nota>= 90,'Competente',if(area1.nota+area2.nota >= 80,'Necesita reforzamiento','No satisfactorio'))) as resultado,encabezado.comentario
+from
+(select @s:=0) as s,
+(select tempnombre.response_id, tempnombre.nomencuesta, tempnombre.fecha, tempnombre.encargado, tempnombre.nombre, tempnombre.puesto, tempnombre.departamento,tempcomentario.comentario
+from
+(select tempnombre.response_id, tempnombre.nomencuesta,tempnombre.fecha,tempnombre.encargado,tempnombre.nombre, usuario.department as puesto, usuario.city as departamento
+from
+(select qrt1.response_id,q.name as nomencuesta, DATE_FORMAT(DATE_ADD(FROM_UNIXTIME(qr1.submitted, '%Y-%m-%d %h:%i'),INTERVAL 7 HOUR),'%d/%m/%Y %H:%i') AS fecha,CONCAT(u1.firstname, ' ',u1.lastname) as encargado,qrt1.response as nombre
+FROM mdl_user as u1
+inner join mdl_questionnaire_response as qr1
+on u1.id=qr1.userid
+inner join mdl_questionnaire_response_text as qrt1
+on qrt1.response_id=qr1.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt1.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%opera%' and lower(qq.name) LIKE '%nombre%')tempnombre
+left JOIN
+(select CONCAT(usuario1.firstname, ' ',usuario1.lastname) as nombrecompleto,usuario1.department,usuario1.city
+from
+mdl_user as usuario1
+where usuario1.deleted=0)usuario
+on tempnombre.nombre like usuario.nombrecompleto
+order by tempnombre.response_id)tempnombre
+left join
+(select qrt1.response_id,qrt1.response as comentario
+from mdl_questionnaire_response_text as qrt1
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt1.question_id
+where lower(qq.name) LIKE '%comentario%')tempcomentario
+on tempnombre.response_id=tempcomentario.response_id)encabezado
+left JOIN
+(select base.response_id, ((if(suma1.conteo is null , 0,suma1.conteo*70/conteototal.conteo))+(if(suma2.conteo is null , 0,suma2.conteo*65/conteototal.conteo))+(if(suma3.conteo is null , 0,suma3.conteo*55/conteototal.conteo))+(if(suma4.conteo is null , 0,suma4.conteo*50/conteototal.conteo))) as nota
+from
+(select qr2.id as response_id
+from
+mdl_questionnaire_response as qr2
+inner join mdl_questionnaire_response_rank as qrt2
+on qrt2.response_id=qr2.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt2.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%opera%' and lower(qq.name) LIKE '%tecnica%'
+group by qr2.id)base
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%opera%' and lower(qq.name) LIKE '%tecnica%' and qrt.rankvalue=1
+group by qr.id) suma1
+on base.response_id=suma1.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%opera%' and lower(qq.name) LIKE '%tecnica%' and qrt.rankvalue=2
+group by qr.id) suma2
+on base.response_id=suma2.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%opera%' and lower(qq.name) LIKE '%tecnica%' and qrt.rankvalue=3
+group by qr.id) suma3
+on base.response_id=suma3.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%opera%' and lower(qq.name) LIKE '%tecnica%' and qrt.rankvalue=4
+group by qr.id) suma4
+on base.response_id=suma4.response_id
+inner join
+(select qr.id as response_id, count(qrt.rankvalue) as conteo
+from mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%opera%' and lower(qq.name) LIKE '%tecnica%'
+group by qr.id)conteototal
+on base.response_id=conteototal.response_id)area1
+on encabezado.response_id=area1.response_id
+left JOIN
+(select base.response_id, ((if(suma1.conteo is null , 0,suma1.conteo*30/conteototal.conteo))+(if(suma2.conteo is null , 0,suma2.conteo*25/conteototal.conteo))+(if(suma3.conteo is null , 0,suma3.conteo*15/conteototal.conteo))+(if(suma4.conteo is null , 0,suma4.conteo*10/conteototal.conteo))) as nota
+from
+(select qr2.id as response_id
+from
+mdl_questionnaire_response as qr2
+inner join mdl_questionnaire_response_rank as qrt2
+on qrt2.response_id=qr2.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt2.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%opera%' and lower(qq.name) LIKE '%integral%'
+group by qr2.id)base
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%opera%' and lower(qq.name) LIKE '%integral%' and qrt.rankvalue=1
+group by qr.id) suma1
+on base.response_id=suma1.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%opera%' and lower(qq.name) LIKE '%integral%' and qrt.rankvalue=2
+group by qr.id) suma2
+on base.response_id=suma2.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%opera%' and lower(qq.name) LIKE '%integral%' and qrt.rankvalue=3
+group by qr.id) suma3
+on base.response_id=suma3.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%opera%' and lower(qq.name) LIKE '%integral%' and qrt.rankvalue=4
+group by qr.id) suma4
+on base.response_id=suma4.response_id
+inner join
+(select qr.id as response_id, count(qrt.rankvalue) as conteo
+from mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%opera%' and lower(qq.name) LIKE '%integral%'
+group by qr.id)conteototal
+on base.response_id=conteototal.response_id)area2
+on encabezado.response_id=area2.response_id
+(select base.response_id, ((if(suma1.conteo is null , 0,suma1.conteo*15/conteototal.conteo))+(if(suma2.conteo is null , 0,suma2.conteo*12/conteototal.conteo))+(if(suma3.conteo is null , 0,suma3.conteo*9/conteototal.conteo))+(if(suma4.conteo is null , 0,suma4.conteo*6/conteototal.conteo))) as nota
+from
+(select qr2.id as response_id
+from
+mdl_questionnaire_response as qr2
+inner join mdl_questionnaire_response_rank as qrt2
+on qrt2.response_id=qr2.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt2.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%opera%' and lower(qq.name) LIKE '%seguridad%'
+group by qr2.id)base
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%opera%' and lower(qq.name) LIKE '%seguridad%' and qrt.rankvalue=1
+group by qr.id) suma1
+on base.response_id=suma1.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%opera%' and lower(qq.name) LIKE '%seguridad%' and qrt.rankvalue=2
+group by qr.id) suma2
+on base.response_id=suma2.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%opera%' and lower(qq.name) LIKE '%seguridad%' and qrt.rankvalue=3
+group by qr.id) suma3
+on base.response_id=suma3.response_id
+LEFT join
+(select qr.id as response_id,  count(qrt.rankvalue) as conteo
+FROM mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) Like '%opera%' and lower(qq.name) LIKE '%seguridad%' and qrt.rankvalue=4
+group by qr.id) suma4
+on base.response_id=suma4.response_id
+inner join
+(select qr.id as response_id, count(qrt.rankvalue) as conteo
+from mdl_questionnaire_response as qr
+inner join mdl_questionnaire_response_rank as qrt
+on qrt.response_id=qr.id
+inner join mdl_questionnaire_question as qq
+on qq.id = qrt.question_id
+inner join mdl_questionnaire as q
+on q.id = qq.surveyid
+where lower(q.name) LIKE '%opera%' and lower(qq.name) LIKE '%seguridad%'
+group by qr.id)conteototal
+on base.response_id=conteototal.response_id)area3
+on encabezado.response_id=area3.response_id
+where encabezado.response_id=11
+[array (
+)]
+Error code: dmlreadexception
+* line 486 of /lib/dml/moodle_database.php: dml_read_exception thrown
+* line 1273 of /lib/dml/mysqli_native_moodle_database.php: call to moodle_database->query_end()
+* line 316 of /local/report/respuesta2.php: call to mysqli_native_moodle_database->get_records_sql()
+
+[23-Feb-2021 14:36:29 America/Guatemala] Default exception handler: Excepción - Missing closing tag: area3 opened on line 82 Debug: 
+Error code: generalexceptionmessage
+* line 187 of /lib/mustache/src/Mustache/Parser.php: Mustache_Exception_SyntaxException thrown
+* line 105 of /lib/mustache/src/Mustache/Parser.php: call to Mustache_Parser->buildTree()
+* line 43 of /lib/mustache/src/Mustache/Parser.php: call to Mustache_Parser->buildTree()
+* line 783 of /lib/mustache/src/Mustache/Engine.php: call to Mustache_Parser->parse()
+* line 808 of /lib/mustache/src/Mustache/Engine.php: call to Mustache_Engine->parse()
+* line 738 of /lib/mustache/src/Mustache/Engine.php: call to Mustache_Engine->compile()
+* line 657 of /lib/mustache/src/Mustache/Engine.php: call to Mustache_Engine->loadSource()
+* line 188 of /lib/outputrenderers.php: call to Mustache_Engine->loadTemplate()
+* line 407 of /local/report/respuesta2.php: call to renderer_base->render_from_template()
+
+[23-Feb-2021 15:03:57 America/Guatemala] Default exception handler: Excepción - Missing closing tag: area3 opened on line 82 Debug: 
+Error code: generalexceptionmessage
+* line 187 of /lib/mustache/src/Mustache/Parser.php: Mustache_Exception_SyntaxException thrown
+* line 105 of /lib/mustache/src/Mustache/Parser.php: call to Mustache_Parser->buildTree()
+* line 43 of /lib/mustache/src/Mustache/Parser.php: call to Mustache_Parser->buildTree()
+* line 783 of /lib/mustache/src/Mustache/Engine.php: call to Mustache_Parser->parse()
+* line 808 of /lib/mustache/src/Mustache/Engine.php: call to Mustache_Engine->parse()
+* line 738 of /lib/mustache/src/Mustache/Engine.php: call to Mustache_Engine->compile()
+* line 657 of /lib/mustache/src/Mustache/Engine.php: call to Mustache_Engine->loadSource()
+* line 188 of /lib/outputrenderers.php: call to Mustache_Engine->loadTemplate()
+* line 408 of /local/report/respuesta2.php: call to renderer_base->render_from_template()
+
+[23-Feb-2021 15:04:34 America/Guatemala] Default exception handler: Excepción - Missing closing tag: area3 opened on line 82 Debug: 
+Error code: generalexceptionmessage
+* line 187 of /lib/mustache/src/Mustache/Parser.php: Mustache_Exception_SyntaxException thrown
+* line 105 of /lib/mustache/src/Mustache/Parser.php: call to Mustache_Parser->buildTree()
+* line 43 of /lib/mustache/src/Mustache/Parser.php: call to Mustache_Parser->buildTree()
+* line 783 of /lib/mustache/src/Mustache/Engine.php: call to Mustache_Parser->parse()
+* line 808 of /lib/mustache/src/Mustache/Engine.php: call to Mustache_Engine->parse()
+* line 738 of /lib/mustache/src/Mustache/Engine.php: call to Mustache_Engine->compile()
+* line 657 of /lib/mustache/src/Mustache/Engine.php: call to Mustache_Engine->loadSource()
+* line 188 of /lib/outputrenderers.php: call to Mustache_Engine->loadTemplate()
+* line 408 of /local/report/respuesta2.php: call to renderer_base->render_from_template()
+
+[23-Feb-2021 15:04:43 America/Guatemala] Default exception handler: Excepción - Missing closing tag: area3 opened on line 82 Debug: 
+Error code: generalexceptionmessage
+* line 187 of /lib/mustache/src/Mustache/Parser.php: Mustache_Exception_SyntaxException thrown
+* line 105 of /lib/mustache/src/Mustache/Parser.php: call to Mustache_Parser->buildTree()
+* line 43 of /lib/mustache/src/Mustache/Parser.php: call to Mustache_Parser->buildTree()
+* line 783 of /lib/mustache/src/Mustache/Engine.php: call to Mustache_Parser->parse()
+* line 808 of /lib/mustache/src/Mustache/Engine.php: call to Mustache_Engine->parse()
+* line 738 of /lib/mustache/src/Mustache/Engine.php: call to Mustache_Engine->compile()
+* line 657 of /lib/mustache/src/Mustache/Engine.php: call to Mustache_Engine->loadSource()
+* line 188 of /lib/outputrenderers.php: call to Mustache_Engine->loadTemplate()
+* line 408 of /local/report/respuesta2.php: call to renderer_base->render_from_template()
+
+[23-Feb-2021 15:06:12 America/Guatemala] Default exception handler: Excepción - Missing closing tag: area3 opened on line 82 Debug: 
+Error code: generalexceptionmessage
+* line 187 of /lib/mustache/src/Mustache/Parser.php: Mustache_Exception_SyntaxException thrown
+* line 105 of /lib/mustache/src/Mustache/Parser.php: call to Mustache_Parser->buildTree()
+* line 43 of /lib/mustache/src/Mustache/Parser.php: call to Mustache_Parser->buildTree()
+* line 783 of /lib/mustache/src/Mustache/Engine.php: call to Mustache_Parser->parse()
+* line 808 of /lib/mustache/src/Mustache/Engine.php: call to Mustache_Engine->parse()
+* line 738 of /lib/mustache/src/Mustache/Engine.php: call to Mustache_Engine->compile()
+* line 657 of /lib/mustache/src/Mustache/Engine.php: call to Mustache_Engine->loadSource()
+* line 188 of /lib/outputrenderers.php: call to Mustache_Engine->loadTemplate()
+* line 408 of /local/report/respuesta2.php: call to renderer_base->render_from_template()
+
+[26-Feb-2021 17:04:30 America/Guatemala] Default exception handler: Error al leer de la base de datos Debug: FUNCTION u200878855_moodle31.dateadd does not exist
+SELECT
+  ROW_NUMBER() OVER(ORDER BY u.id) AS id
+,
+
+Concat(u.firstname,' ',u.lastname) as nombre,
+	  u.username as codigo,
+	  u.department,
+	dateadd(s,c.startdate,'1970-01-01 00:00:00:000') as inicio,
+	  dateadd(s,c.enddate,'1970-01-01 00:00:00:000')as final,
+	  dateadd(s,cc.timecompleted,'1970-01-01 00:00:00:000')as completado,
+				  CASE When
+					  notas.finalgrade<=0 or notas.finalgrade is null
+					THEN
+					  '0'
+					   ELSE
+					 notas.finalgrade
+				  END AS nota,
+			  CASE when compl.num<=0 or compl.num is null THEN '0%'
+			  ELSE concat(cast(((compl.num*100)/act.num)as decimal(16,0)),'%')
+			  END AS avance,
+			  c.fullname as curso
+			  from mdl_user u
+			  inner join (Select distinct ue.userid, e.courseid,ue.timestart from mdl_user_enrolments ue
+			  inner join mdl_enrol e
+			  on ue.enrolid=e.id
+			  ) as usrcourse
+			  on u.id=usrcourse.userid
+			  left join (Select gi.courseid,gg.userid,gg.finalgrade
+			  from mdl_grade_items gi
+			  inner join mdl_grade_grades gg
+			  on gg.itemid=gi.id
+			  where gi.itemtype='course')as notas
+			  on u.id=notas.userid and usrcourse.courseid=notas.courseid
+			  left join mdl_course_completions cc
+			  on u.id=cc.userid and usrcourse.courseid=cc.course
+			  left join(Select count(id)as num,course from mdl_course_completion_criteria
+			  group by course) as act
+			  on act.course=usrcourse.courseid
+			  left join (Select userid,course,count(id)as num from mdl_course_completion_crit_compl
+			  group by course, userid)as compl
+			  on compl.userid=u.id and compl.course=usrcourse.courseid
+			  left join mdl_course c
+			  on usrcourse.courseid = c.id
+[array (
+)]
+Error code: dmlreadexception
+* line 486 of /lib/dml/moodle_database.php: dml_read_exception thrown
+* line 1273 of /lib/dml/mysqli_native_moodle_database.php: call to moodle_database->query_end()
+* line 98 of /local/report/gelder.php: call to mysqli_native_moodle_database->get_records_sql()
+
